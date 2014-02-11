@@ -1,0 +1,141 @@
+\begin{thebibliography}{10}
+
+\bibitem{Abdulla09Lips}
+W.~Abdulla, P.W.T. Yu, and P.~Calverly.
+\newblock Lips tracking biometrics for speaker recognition.
+\newblock 1(3):288--306, 2009.
+
+\bibitem{Auckenthaler99lip}
+R.~Auckenthaler, J.~Brand, J.~Mason, C.~Chibelushi, and F.~Deravi.
+\newblock Lip signatures for automatic person recognition.
+\newblock In {\em MMSP}, pages 457 -- 462, 1999.
+
+\bibitem{Bengio01Evaluation}
+S.~Bengio, J.~Mariethoz, and S.~Marcel.
+\newblock Evaluation of biometric technology on \textsc{XM2VTS}, 2001.
+
+\bibitem{Broun02Automatic}
+C.C.Broun, X.Zhang, R.M.Mersereau, and M.Clements.
+\newblock Automatic speechreading with application to speaker verification.
+\newblock In {\em ICASSP}, volume~1, pages 685 -- 688, 2002.
+
+\bibitem{Cetingul06Discriminative}
+H.E. \c{C}eting\"{u}l, E.~Erzin, Y.~Yemez, and A.M. Tekalp.
+\newblock Discriminative analysis of lip motion features for speaker
+  identification and speech-reading.
+\newblock {\em Image Processing, IEEE Trans.}, 15(10):2879--2891, 2006.
+
+\bibitem{Cetingul04Use}
+H.E. \c{C}eting\"{u}l, Y.~Yemez, E.~Erzin, and A.M. Tekalp.
+\newblock The use of lip motion for biometric speaker identification.
+\newblock In {\em SIU}, pages 148 -- 151, 2004.
+
+\bibitem{Cetingul06Multi}
+H.E. \c{C}eting\"{u}l, Y.~Yemez, E.~Erzin, and A.M. Tekalp.
+\newblock Multimodal speaker/speech recognition using lip motion, lip texture
+  and audio.
+\newblock {\em Signal Process.}, 86(12):3549--3558, 2006.
+
+\bibitem{Chibelushi96Design}
+C.C. Chibelushi, S.~Gandon, J.S.D. Mason, F.~Deravi, and R.D. Johnston.
+\newblock Design issues for a digital integrated audio-visual database.
+\newblock {\em Integrated Audio-Visual Processing for Recognition, Synthesis
+  and Communication, IEE Colloquium on}, pages 711--717, 1996.
+
+\bibitem{Choras08Human}
+M.~Choras\'{s}.
+\newblock Human lips as emerging biometrics modality.
+\newblock In {\em ICIAR}, pages 993 -- 1002, 2008.
+
+\bibitem{Faraj06Motion}
+M.I. Faraj and J.~Big\"{u}n.
+\newblock Motion features from lip movement for person authentication.
+\newblock In {\em ICPR}, pages 1059--1062, 2006.
+
+\bibitem{Faraj06Person}
+M.I. Faraj and J.~Big\"{u}n.
+\newblock Person verification by lip-motion.
+\newblock In {\em CWPRW}, pages 37--44, 2006.
+
+\bibitem{Gomez02Biometric}
+E.~Gomez, C.M. Travieso, J.C. Briceno, and M.A. Ferrer.
+\newblock Biometric identification system by lip shape.
+\newblock In {\em ICCST}, pages 39 -- 42, 2002.
+
+\bibitem{conf/icig/Jin04}
+H.~Jin, Q.~Liu, H.~Lu, and X.~Tong.
+\newblock Face detection using improved lbp under bayesian framework.
+\newblock In {\em ICIG}, pages 306--309, 2004.
+
+\bibitem{Kasprzak90Poss}
+J.~Kasprazak.
+\newblock Possibilities of cheiloscopy.
+\newblock {\em Forensic Science International}, 46:145--151, 1990.
+
+\bibitem{Messer99Xm2vts}
+K.Messer, J.Matas, J.Kittler, J.Luettin, and G.Maitre.
+\newblock \textsc{XM2VTSDB}: The extended \textsc{M2VTS} database.
+\newblock In {\em AVBPA}, 1999.
+
+\bibitem{Ramos00Thesis}
+M.U.R.S\'{a}nchez.
+\newblock {\em Aspects of facial biometrics for verification of personal
+  identity}.
+\newblock PhD thesis, University of Surrey, UK, 2000.
+
+\bibitem{conf/SPIE/pietikaeinenONH94}
+M.~Pietik{\"a}inen, T.~Ojala, J.~Nisula, and J.~Heikkinen.
+\newblock Experiments with two industrial problems using texture classification
+  based on feature distributions.
+\newblock {\em Intelligent Robots and Computer Vision XIII: 3D Vision, Product
+  Inspection, and Active Vision}, 2354(1):197--204, 1994.
+
+\bibitem{Jourlin97Acoustic}
+P.Jourlin, J.Luettin, D.Genoud, and H.Wassner.
+\newblock Acoustic labial speaker verification.
+\newblock In {\em AVBPA}, pages 319--334, 1997.
+
+\bibitem{Samad07Lower}
+S.A. Samad, D.~A. Ramli, and Aini Hussain.
+\newblock Lower face verification centered on lips using correlation filters.
+\newblock {\em Information Technology Journal}, 6(8):1146--1151, 2007.
+
+\bibitem{Ramos06Fusion}
+M.U.R. S\'{a}nchez and J.~Kittler.
+\newblock Fusion of talking face biometric modalities for personal identity
+  verification.
+\newblock In {\em ICASSP}, volume~5, pages 1073 -- 1076, 2006.
+
+\bibitem{Suzuki68Trail}
+K.~Suzuki, Y.~Tsuchihashi, and H.~Suzuki.
+\newblock A trail of personal identification by means of lip print.
+\newblock {\em I. Jap. J. Leg. Med.}, 22:392, 1968.
+
+\bibitem{Tamura04Multi}
+S.~Tamura, K.~Iwano, and S.~Furui.
+\newblock Multi-modal speech recognition using optical-flow analysis for lip
+  images.
+\newblock {\em J. VLSI Signal Process. Syst.}, 36(2/3):117--124, 2004.
+
+\bibitem{conf/amfg/TanT07}
+X.~Tan and B.~Triggs.
+\newblock Enhanced local texture feature sets for face recognition under
+  difficult lighting conditions.
+\newblock In {\em AMFG}, pages 168--182, 2007.
+
+\bibitem{Wark97Person}
+T.Wark, D.~Thambiratnam, and S.Sridharan.
+\newblock Person authentication using lip information.
+\newblock In {\em IEEE TENCON}, pages 153--156, 1997.
+
+\bibitem{conf/eccv/ZabihW94}
+R.~Zabih and J.~Woodfill.
+\newblock Non-parametric local transforms for computing visual correspondence.
+\newblock In {\em ECCV (2)}, pages 151--158, 1994.
+
+\bibitem{conf/icpr/ZhaoP06}
+G.~Zhao and M.~Pietik{\"a}inen.
+\newblock Local binary pattern descriptors for dynamic texture recognition.
+\newblock In {\em ICPR (2)}, pages 211--214, 2006.
+
+\end{thebibliography}

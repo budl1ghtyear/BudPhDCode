@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/ravl/!svn/ver/7679/main/Ravl/Contrib/LibFFmpeg
+END
+FFmpegVideoEncoder.cc
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/FFmpegVideoEncoder.cc
+END
+FFmpegVideoDecoder.hh
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/FFmpegVideoDecoder.hh
+END
+FFmpegPacket.cc
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ravl/!svn/ver/5611/main/Ravl/Contrib/LibFFmpeg/FFmpegPacket.cc
+END
+FFmpegEncodePacketStream.hh
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/ravl/!svn/ver/7429/main/Ravl/Contrib/LibFFmpeg/FFmpegEncodePacketStream.hh
+END
+exFFmpeg.cc
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/ravl/!svn/ver/6742/main/Ravl/Contrib/LibFFmpeg/exFFmpeg.cc
+END
+ImgIOFFmpeg.hh
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/ravl/!svn/ver/6685/main/Ravl/Contrib/LibFFmpeg/ImgIOFFmpeg.hh
+END
+defs.mk
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ravl/!svn/ver/7424/main/Ravl/Contrib/LibFFmpeg/defs.mk
+END
+LibFFmpeg.def
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/ravl/!svn/ver/7679/main/Ravl/Contrib/LibFFmpeg/LibFFmpeg.def
+END
+ImgDPOFFmpeg.cc
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/ImgDPOFFmpeg.cc
+END
+LibFFmpegFormat.cc
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/ravl/!svn/ver/7393/main/Ravl/Contrib/LibFFmpeg/LibFFmpegFormat.cc
+END
+FFmpegVideoEncoder.hh
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/FFmpegVideoEncoder.hh
+END
+FFmpegPacket.hh
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/FFmpegPacket.hh
+END
+FFmpegPacketStream.cc
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7287/main/Ravl/Contrib/LibFFmpeg/FFmpegPacketStream.cc
+END
+exFFmpegSeek.cc
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ravl/!svn/ver/6742/main/Ravl/Contrib/LibFFmpeg/exFFmpegSeek.cc
+END
+LibFFmpeg.html
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/ravl/!svn/ver/7428/main/Ravl/Contrib/LibFFmpeg/LibFFmpeg.html
+END
+ImgDPOFFmpeg.hh
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ravl/!svn/ver/7406/main/Ravl/Contrib/LibFFmpeg/ImgDPOFFmpeg.hh
+END
+LibFFmpegFormat.hh
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/ravl/!svn/ver/7393/main/Ravl/Contrib/LibFFmpeg/LibFFmpegFormat.hh
+END
+FFmpegVideoDecoder.cc
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7052/main/Ravl/Contrib/LibFFmpeg/FFmpegVideoDecoder.cc
+END
+FFmpegPacketStream.hh
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/ravl/!svn/ver/7052/main/Ravl/Contrib/LibFFmpeg/FFmpegPacketStream.hh
+END
+MustLinkLibFFmpeg.cc
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/ravl/!svn/ver/6685/main/Ravl/Contrib/LibFFmpeg/MustLinkLibFFmpeg.cc
+END
+exFFmpegOutPut.cc
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svnroot/ravl/!svn/ver/7426/main/Ravl/Contrib/LibFFmpeg/exFFmpegOutPut.cc
+END
+FFmpegEncodePacketStream.cc
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/ravl/!svn/ver/7679/main/Ravl/Contrib/LibFFmpeg/FFmpegEncodePacketStream.cc
+END
+ImgIOFFmpeg.cc
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/ravl/!svn/ver/6685/main/Ravl/Contrib/LibFFmpeg/ImgIOFFmpeg.cc
+END

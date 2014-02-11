@@ -1,0 +1,24 @@
+\begin{table}[htpb!]
+\centering
+\setlength{\tabcolsep}{3pt}
+\rowcolors{3}{white}{Lavender}
+\resizebox{8.5cm}{!}{
+% \scalebox{0.5}{!}{
+\begin{tabular}{ccccccccc}
+\toprule
+\multirow{3}{*}{\centering\textbf{TOP Input}}&\multicolumn{4}{c}{\textbf{Configuration I}}&\multicolumn{4}{c}{\textbf{Configuration II}}\\
+&\multicolumn{2}{c}{\textbf{LBP}}&\multicolumn{2}{c}{\textbf{LOCP}}&\multicolumn{2}{c}{\textbf{LBP}}&\multicolumn{2}{c}{\textbf{LOCP}}\\
+&\textbf{ Eval}&\textbf{Test}&\textbf{Eval}&\textbf{Test}&\textbf{ Eval}&\textbf{Test}&\textbf{Eval}&\textbf{Test} \\
+\midrule
+TOP	&0.87	&1.29	&0.25	&0.36	&1.5	&1.67	&0.99	&0.49\\
+WTOP, $\sigma=0.1$	&0.86	&1.64	&0.33	&0.38	&1.3	&1.57	&0.76	&0.5\\
+WTOP, $\sigma=0.5$	&0.87	&1.43	&0.33	&0.38	&1.51	&1.53	&0.75	&0.62\\
+WTOP, $\sigma=1$	&0.83	&1.75	&0.19	&0.44	&1.53	&1.53	&0.75	&0.62\\
+WTOP, $\sigma=10$	&0.84	&1.01	&0.33	&0.09	&\textbf{1.25}	&\textbf{0.96}	&\textbf{0.61}	&\textbf{0.27}\\
+WTOP, $\sigma=100$	&0.86	&1.18	&0.33	&0.35	&1.52	&1.23	&0.96	&0.55\\ 
+\hline
+\end{tabular}
+}
+\caption{LOCP/LBP-WTOP performance using the Normalised Correlation system}
+\label{WTOPLDA}
+\end{table}

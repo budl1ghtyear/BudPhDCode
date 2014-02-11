@@ -1,0 +1,3 @@
+PLIB = Modelling
+MAINS = ShapeModel.cc
+USESLIBS = RavlCore RavlIO RavlImageIO RavlVideoIO RavlDPDisplay RavlImageProc RavlExtImgIO  Bspline

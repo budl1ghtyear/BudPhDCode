@@ -1,0 +1,6 @@
+PACKAGE =Vtefm 
+MAINS = testColorTransformGuided.cc testStirlingData.cc
+SOURCES = ColorNorm.cc ColorNormHist.cc ColorSpaces.cc
+HEADERS = ColorNorm.hh ColorSpaces.hh
+PLIB=VtefmVisualNorm
+

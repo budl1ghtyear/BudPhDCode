@@ -1,0 +1,222 @@
+#include "Ravl/Point3d.hh"
+#include "ColorNorm.hh"
+#include "ColorSpaces.hh"
+#include "Ravl/Image/Image.hh"
+#include "Ravl/Image/ByteRGBValue.hh"
+#include "Ravl/Option.hh"
+#include "Ravl/Image/ImgIO.hh"
+#include "Ravl/OS/Filename.hh" 
+#include "Ravl/IO.hh"
+
+using namespace RavlN;
+using namespace RavlImageN;
+
+/* Load the lines in the file into a DList */
+bool LoadListFromFile(FilenameC filename, DListC<StringC> &TFileNameList)
+{ FILE *fpT=fopen(filename,"r");
+  char * lineT = NULL;
+  size_t lenT = 0;
+  ssize_t readT;
+  if (fpT == NULL) return 0;
+  while ((readT = getline(&lineT, &lenT, fpT)) != -1) 
+  {
+      StringC str(lineT);
+      TFileNameList.InsLast(str.before((IntT)(str.length())-1));
+  }
+  if (lineT)  free(lineT);
+  fclose(fpT);
+  return 1;
+}
+
+/* color mapping using the transform learnt from a pair of images */
+int main(int argc, char **argv)
+{ 
+   OptionC   opt(argc,argv);
+   FilenameC imSrcFile = opt.String("sf","","Source image file for learning the transform" );
+   FilenameC imDesFile = opt.String("df","","Target image file for learning the transform " );
+   FilenameC imInFile = opt.String("in","","input image file to process" );
+   FilenameC imOutFile = opt.String("o","/tmp/temp.ppm","output image file" );
+   FilenameC imSrcListFile = opt.String("sl","","Source image file list for learning the transform" );
+   FilenameC imDesListFile = opt.String("dl","","Target image file list for learning the transform " );
+   FilenameC imInListFile = opt.String("il","","input image file list to process" );
+   FilenameC imOutListFile = opt.String("ol","","output image file list" );
+   IntT colorTransformType = opt.Int("t", 4,"type of transform method: 0: affine transform RGB space, 1: color constancy method with Greyworld, 2 affine transform LAB space, 3, affine LUV space, 4: Mean Std norm, 5: histogram shape mapping. Best performance with mena/std normalisation");
+   bool verbose=opt.Boolean("v", false,"verbose");
+   opt.Check();
+   
+   if(opt.IsOnCommandLine("sl")) //processs list of images
+   {   DListC<StringC> imSrcFilenameList, imDesFilenameList, imInFilenameList, imOutFilenameList; 
+	if(! LoadListFromFile( imSrcListFile,  imSrcFilenameList)) 
+	{	cerr<<"Failed to load source image filenames from "<<imSrcListFile <<endl; return 0;}
+	if(! LoadListFromFile( imDesListFile,  imDesFilenameList)) 
+	{	cerr<<"Failed to load destinatation image filenames from "<<imDesListFile <<endl; return 0;}
+	if(! LoadListFromFile( imInListFile,  imInFilenameList)) 
+	{	cerr<<"Failed to load input image filenames from "<<imInListFile <<endl; return 0;}
+	if(! LoadListFromFile( imOutListFile,  imOutFilenameList)) 
+	{	cerr<<"Failed to load grounf truth image filenames from "<<imOutListFile <<endl; return 0;}
+	
+	if( imSrcFilenameList.Size() != imDesFilenameList.Size() || imSrcFilenameList.Size() != imInFilenameList.Size() ||  imInFilenameList.Size()!= imOutFilenameList.Size())
+	{	cerr<<"Filename List size not match! "<<endl; return 0;}
+	DLIterC<StringC> itSrc(imSrcFilenameList) ;
+	DLIterC<StringC> itDes(imDesFilenameList) ;
+	DLIterC<StringC> itIn(imInFilenameList) ;
+	DLIterC<StringC> itOut(imOutFilenameList) ;
+        if(verbose) cout<<" Names of images to be processed: "<<imSrcFilenameList.Size() <<endl;
+	for(; itSrc; itSrc++,itDes++,itIn++,itOut++)
+	{	ImageC<ByteRGBValueC> imSrc, imDes, imIn,imOut;
+		if(!Load(*itSrc,imSrc))
+		     { cerr<<"Failed to load image: "<<*itSrc<<endl;        return 0;      }
+		if(!Load(*itDes, imDes ))
+		     { cerr<<"Failed to load image: "<<*itDes<<endl;       return 0;     }
+		if(!Load(*itIn, imIn ))
+		     { cerr<<"Failed to load image: "<<*itIn<<endl;        return 0;     }
+		switch(colorTransformType) 
+   		{	case 0: 
+			{	ColorNormAffineC colorNorm;
+	   			if(! colorNorm.LearnTransformFromImgs(imSrc,imDes, verbose))
+			   	{ 	cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+			  	//cout<<"-- affine transform learned"<<endl;
+  	  			imOut = colorNorm.Apply(imIn, verbose);
+		         } break;
+		 	case 1: 
+			{	ColorNormC colorNorm; 
+				colorNorm.SetColorConstType( GREY_WORLD);
+				VectorC illumDes = colorNorm.IllumEstimate(imDes, verbose);
+				//cout<<"target illum "<< illumDes<<endl;	
+				imOut = colorNorm.Transform(imIn, illumDes, verbose);
+         		} break;
+   			case 2: 
+			{	ImageC<RealRGBValueC> imSrc_LAB(imSrc.Frame())	;
+				ImageC<RealRGBValueC> imDes_LAB(imDes.Frame())	;	
+				ImageC<RealRGBValueC> imIn_LAB(imIn.Frame()) ;	
+				imSrc_LAB = imXYZ2LAB( imRGB2XYZ(imSrc));
+				imDes_LAB = imXYZ2LAB( imRGB2XYZ(imDes));
+				imIn_LAB = imXYZ2LAB( imRGB2XYZ(imIn));
+				ColorNormAffineC colorNorm;
+				if(! colorNorm.LearnTransformFromImgs( imSrc_LAB, imDes_LAB, verbose))
+				{ cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+				ImageC<RealRGBValueC> imOut_LAB = colorNorm.Apply(imIn_LAB, verbose);			
+				imOut = imXYZ2RGB(imLAB2XYZ(imOut_LAB));
+			 } break;
+			case 3:
+			{	ImageC<RealRGBValueC> imSrc_LUV(imSrc.Frame())	;
+			 	ImageC<RealRGBValueC> imDes_LUV(imDes.Frame())	;	
+			 	ImageC<RealRGBValueC> imIn_LUV(imIn.Frame()) ;	
+			 	imSrc_LUV = imXYZ2LUV( imRGB2XYZ(imSrc));
+			  	imDes_LUV = imXYZ2LUV( imRGB2XYZ(imDes));
+			  	imIn_LUV = imXYZ2LUV( imRGB2XYZ(imIn));
+			  	ColorNormAffineC colorNorm;
+		   		if(! colorNorm.LearnTransformFromImgs( imSrc_LUV, imDes_LUV, verbose))
+				   { cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+				ImageC<RealRGBValueC> imOut_LUV = colorNorm.Apply(imIn_LUV, verbose);			
+				imOut = imXYZ2RGB(imLUV2XYZ(imOut_LUV));
+			} break;		
+			case 4:
+			{	ColorNormHistStatC colorNorm;
+				Vector3dC meanVecSrc,stdVecSrc,meanVecDes, stdVecDes;
+				colorNorm.GetHistStatistics(imDes, meanVecDes,stdVecDes);
+				colorNorm.GetHistStatistics(imSrc, meanVecSrc, stdVecSrc);
+				imOut= colorNorm.Apply(imIn, meanVecDes, stdVecDes,meanVecSrc, stdVecSrc);
+			}break;
+			case 5 :
+			{	ColorNormHistShapeC colorNorm;
+				colorNorm.GetColorMap(imSrc, imDes);
+				imOut = colorNorm.Apply(imIn);
+			}break;
+	
+		 	default:;
+  		}
+   
+   		if(!Save(*itOut, imOut))
+		{ cerr<<"Failed to save image to: "<<imOutFile<<endl;        return 0; }
+	}	
+
+	return 1 ;
+   }
+   // load images
+   ImageC<ByteRGBValueC> imSrc, imDes, imIn, imOut;
+   if(!Load(imSrcFile, imSrc))
+     { cerr<<"Failed to load image: "<<imSrcFile<<endl;
+        return 0;;
+     }
+   if(!Load(imDesFile, imDes))
+     { cerr<<"Failed to load image: "<<imDesFile<<endl;
+        return 0;;
+     }
+   if(!Load(imInFile, imIn))
+     { cerr<<"Failed to load image: "<<imInFile<<endl;
+        return 0;;
+     }
+   Save("@X:Source", imSrc);
+   Save("@X:Target", imDes);
+   Save("@X:Input", imIn);
+  
+   switch(colorTransformType) 
+   {case 0: 
+	{	ColorNormAffineC colorNorm;
+	   	if(! colorNorm.LearnTransformFromImgs(imSrc,imDes,verbose))
+	   	{ 	cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+	  	//cout<<"-- affine transform learned"<<endl;
+  	  	imOut = colorNorm.Apply(imIn,verbose);
+         } break;
+    case 1: 
+	{	ColorNormC colorNorm; 
+		colorNorm.SetColorConstType( GREY_WORLD);
+		VectorC illumDes = colorNorm.IllumEstimate(imDes,verbose);
+		//cout<<"target illum "<< illumDes<<endl;	
+		imOut = colorNorm.Transform(imIn, illumDes,verbose);
+         } break;
+   case 2: 
+	{	ImageC<RealRGBValueC> imSrc_LAB(imSrc.Frame())	;
+		ImageC<RealRGBValueC> imDes_LAB(imDes.Frame())	;	
+		ImageC<RealRGBValueC> imIn_LAB(imIn.Frame()) ;	
+		imSrc_LAB = imXYZ2LAB( imRGB2XYZ(imSrc));
+		imDes_LAB = imXYZ2LAB( imRGB2XYZ(imDes));
+		imIn_LAB = imXYZ2LAB( imRGB2XYZ(imIn));
+		ColorNormAffineC colorNorm;
+		if(! colorNorm.LearnTransformFromImgs( imSrc_LAB, imDes_LAB, verbose))
+		{ cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+		ImageC<RealRGBValueC> imOut_LAB = colorNorm.Apply(imIn_LAB, verbose);			
+		imOut = imXYZ2RGB(imLAB2XYZ(imOut_LAB));
+	 }	break;
+    case 3:
+	{	ImageC<RealRGBValueC> imSrc_LUV(imSrc.Frame())	;
+	 	ImageC<RealRGBValueC> imDes_LUV(imDes.Frame())	;	
+	 	ImageC<RealRGBValueC> imIn_LUV(imIn.Frame()) ;	
+	 	imSrc_LUV = imXYZ2LUV( imRGB2XYZ(imSrc));
+	  	imDes_LUV = imXYZ2LUV( imRGB2XYZ(imDes));
+	  	imIn_LUV = imXYZ2LUV( imRGB2XYZ(imIn));
+	  	ColorNormAffineC colorNorm;
+		if(! colorNorm.LearnTransformFromImgs( imSrc_LUV, imDes_LUV, verbose))
+		{ cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+		ImageC<RealRGBValueC> imOut_LUV = colorNorm.Apply(imIn_LUV, verbose);			
+		imOut = imXYZ2RGB(imLUV2XYZ(imOut_LUV));
+	}      break;
+	case 4:
+	{	ColorNormHistStatC colorNorm;
+		Vector3dC meanVecSrc,stdVecSrc,meanVecDes, stdVecDes;
+		colorNorm.GetHistStatistics(imDes, meanVecDes,stdVecDes);
+		colorNorm.GetHistStatistics(imSrc, meanVecSrc, stdVecSrc);
+		imOut= colorNorm.Apply(imIn, meanVecDes, stdVecDes,meanVecSrc, stdVecSrc);
+	}break;
+	case 5 :
+	{	ColorNormHistShapeC colorNorm;
+		colorNorm.GetColorMap(imSrc, imDes);
+		//cout<<"colormap obtained"<<endl;
+		imOut = colorNorm.Apply(imIn);
+	}break;
+	
+       default:;
+  }
+   
+   Save("@X: Transformed input", imOut);
+  
+   if(!Save(imOutFile, imOut))
+     { cerr<<"Failed to save image to: "<<imOutFile<<endl;
+        return 0;;
+     }
+ 
+
+
+   return 1;
+}

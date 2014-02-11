@@ -1,0 +1,33 @@
+\begin{table*}[htbp!]
+\centering
+\rowcolors{2}{LightPink}{white}
+\begin{tabular}{cccccll}
+\toprule
+\textbf{System}&\textbf{Lip Feature}&\textbf{Database}&\textbf{Clients}&\multicolumn{2}{c}{\textbf{Performance}} \\
+\midrule
+Faraj\cite{Faraj06Person}&Lip Dynamic TI&\textbf{XM2VTS}&295&EER&22\\ 
+Sanchez\cite{Ramos06Fusion}&Lip Dynamic TD&\textbf{XM2VTS}&295&HTER&\textbf{13.35}\\ 
+Gomez\cite{Gomez02Biometric}&Static(lip geometric)&Custom&50&EER&0.015 \\ 
+Jourlin\cite{Jourlin97Acoustic}&Static(lip shape)&M2VTS&37&HTER&6.85 \\ 
+Samad\cite{Samad07Lower}&Lip Dynamic TI&AMP CMU&10&HTER&0.0 \\ 
+Wark\cite{Wark97Person}&Lip Dynamic TI&TULIPS1&96&EER&0.0 \\ 
+Wark\cite{Wark97Person}&Static(lip shape)&TULIPS1&96&EER&6.3 \\ 
+Wark\cite{Wark97Person}&Static(lip intensity)&TULIPS1&96&EER&0.0 \\ \bottomrule
+% \hiderowcolors
+\textbf{System}&\textbf{Feature Fusion}&\textbf{Database}&\textbf{Clients}&\multicolumn{2}{c}{\textbf{Performance}} \\
+\midrule
+% \showrowcolors
+Broun\cite{Broun02Automatic}&Static(lip geometric) + Audio &\textbf{XM2VTS}&261&HTER&6.3 \\ 
+Faraj\cite{Faraj06Person}&Lip Dynamic TI + Audio &\textbf{XM2VTS}&295&EER&2\\ 
+Sanchez\cite{Ramos06Fusion}&Lip Dynamic TD + Face&\textbf{XM2VTS}&295&HTER&4.72 \\ 
+Sanchez\cite{Ramos06Fusion}&Lip Dynamic TD + Audio&\textbf{XM2VTS}&295&HTER&\textbf{0.74}\\ 
+Sanchez\cite{Ramos06Fusion}&Lip Dynamic TD + Face + Audio&\textbf{XM2VTS}&295&HTER&7.06 \\ 
+Abdulla\cite{Abdulla09Lips}&Hybrid(lip shape and lip intensity)&Custom&35&EER&18.0 \\ 
+Cetingul\cite{Cetingul06Discriminative}&Hybrid(lip texture and lip motion)&MVGL-AVD&50&EER&5.2 \\ 
+Cetingul\cite{Cetingul06Multi}&Static(lip texture)&MVGL-AVD&50&EER&1.7 \\ 
+Jourlin\cite{Jourlin97Acoustic}&Static(lip shape) + Audio&M2VTS&37&HTER&0.3 \\ 
+\bottomrule
+\end{tabular}
+\caption{Performance of Lip Biometric Systems for Speaker Verification Showing Lip Performance And Fusion Performance}
+\label{PerformanceOfLipBiometrics}
+\end{table*}

@@ -1,0 +1,24 @@
+\begin{table}[htpb!]
+\centering
+\setlength{\tabcolsep}{3pt}
+\rowcolors{3}{white}{Lavender}
+\resizebox{8.5cm}{!}{
+% \scalebox{0.5}{!}{
+\begin{tabular}{ccccccccc}
+\toprule
+\multirow{3}{*}{\centering\textbf{TOP Input}}&\multicolumn{4}{c}{\textbf{Configuration I}}&\multicolumn{4}{c}{\textbf{Configuration II}}\\
+&\multicolumn{2}{c}{\textbf{LBP}}&\multicolumn{2}{c}{\textbf{LOCP}}&\multicolumn{2}{c}{\textbf{LBP}}&\multicolumn{2}{c}{\textbf{LOCP}}\\
+&\textbf{ Eval}&\textbf{Test}&\textbf{Eval}&\textbf{Test}&\textbf{ Eval}&\textbf{Test}&\textbf{Eval}&\textbf{Test} \\
+\midrule
+TOP	&3.18	&3.52	&2.99	&3.86	&4.46	&3.60	&4.27	&3.97\\
+WTOP, $\sigma=0.1$	&3.32	&3.77	&3.21	&3.69	&4.48	&3.68	&4.23	&3.92\\
+WTOP, $\sigma=0.5$	&3.41	&4.03	&3.22	&3.69	&4.71	&3.83	&4.41	&3.97\\
+WTOP, $\sigma=1$	&3.36	&3.95	&3.17	&3.59	&4.26	&4.07	&3.99	&3.74\\
+WTOP, $\sigma=10$	&3.00	&3.19	&2.51	&3.04	&4.43	&4.11	&4.01	&3.49\\
+WTOP, $\sigma=100$	&3.92	&4.28	&3.82	&3.82	&6.51	&5.63	&6.26	&5.8\\
+\hline
+\end{tabular}
+}
+\caption{LOCP/LBP-WTOP performance using the Chi-squared system}
+\label{WTOPChi}
+\end{table}

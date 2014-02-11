@@ -1,0 +1,36 @@
+# This file is part of RAVL, Recognition And Vision Library 
+# Copyright (C) 2003, University of Surrey
+# This code may be redistributed under the terms of the GNU
+# General Public License (GPL). See the gpl.licence file for details or
+# see http://www.gnu.org/copyleft/gpl.html
+# file-header-ends-here
+
+ifndef LIBFFMPEG_DEF
+  LIBFFMPEG_DEF=1
+
+  ifndef LIBFFMPEG_HOME
+    LIBFFMPEG_HOME := /usr
+  endif
+  
+  ifeq ($(LOCALARC),linux64)
+    PKG_CONFIG_PATH := $(LIBFFMPEG_HOME)/lib64/pkgconfig:$(PKG_CONFIG_PATH)
+  else
+    PKG_CONFIG_PATH := $(LIBFFMPEG_HOME)/lib/pkgconfig:$(PKG_CONFIG_PATH)
+  endif
+  LIBFFMPEG_INCLUDES := $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config libavformat libavcodec --cflags-only-I)
+  LIBFFMPEG_INCLUDES += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config libswscale --silence-errors --cflags-only-I)
+  LIBFFMPEG_INCLUDES += -I$(LIBFFMPEG_HOME)/include/libavformat -I$(LIBFFMPEG_HOME)/include/libavcodec
+  LIBFFMPEG_LIBS := $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config libswscale libavdevice --silence-errors --libs)
+  LIBFFMPEG_LIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config libavformat libavcodec --libs)
+  LIBFFMPEG_LIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config libavutil libswscale --silence-errors --libs)
+
+  INCLUDES := $(LIBFFMPEG_INCLUDES) $(INCLUDES)
+  EXELIB := $(LIBFFMPEG_LIBS) $(EXELIB)
+
+  FFHDRS := $(shell ls $(LIBFFMPEG_HOME)/include/ffmpeg)
+  ifeq ($(strip $(filter %.h, $(FFHDRS))),)
+    CCPPFLAGS += "-DLIBAVFORMAT_VERSION_MAJOR=52"
+  endif
+  TARGET += $(FILES)
+endif
+

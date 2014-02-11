@@ -1,0 +1,381 @@
+////////////////////////////////////////////////////////////////////
+//! file="testStirlingData.cc"
+//! author="Xuan Zou"
+//! this file shows how to use the color transform learnt from a pair of corresponding regions in the source and target image, then apply the transform to the whole image
+//! 
+
+
+#include "ColorNorm.hh"
+#include "ColorSpaces.hh"
+#include "Ravl/Image/Image.hh"
+#include "Ravl/Image/ByteRGBValue.hh"
+#include "Ravl/Option.hh"
+#include "Ravl/Image/ImgIO.hh"
+#include "Ravl/OS/Filename.hh" 
+#include "Ravl/IO.hh"
+#include "Ravl/OS/Directory.hh"
+#include "Ravl/DLIter.hh"
+#include "Ravl/Array2dIter2.hh"
+#include "Ravl/Image/WarpScale.hh"
+#include "Ravl/Image/ImageConv.hh"
+#include "Ravl/DP/FileFormatIO.hh"
+using namespace RavlN;
+using namespace RavlImageN;
+
+template <class DataT > bool geoNorm(ImageC<DataT> &img, ImageC<DataT> &normImg, ImageRectangleC outRect,Point2dC re,Point2dC le,Point2dC leftEyePos, Point2dC rightEyePos)
+{      
+  // Gather reference points
+  RealT    rowFrac            = re.Row() / outRect.Rows();
+  RealT    faceEyeSeperation  = leftEyePos.EuclidDistance(rightEyePos);
+  RealT    templEyeSeperation = le.EuclidDistance(re);
+  RealT    scaleFactor        = faceEyeSeperation / templEyeSeperation;
+  Point2dC faceRefPt          = rightEyePos + (leftEyePos - rightEyePos) / 2;
+
+      // Define the required face rectangle on the face image
+  IndexC minRow = faceRefPt.Row() - rowFrac*scaleFactor*outRect.Rows();
+  IndexC maxRow = faceRefPt.Row() + (1-rowFrac)*scaleFactor*outRect.Rows();
+  IndexC minCol = faceRefPt.Col() - (scaleFactor*outRect.Cols())/2;
+  IndexC maxCol = faceRefPt.Col() + (scaleFactor*outRect.Cols())/2;
+  if(minCol<0 || maxCol <0 ||minRow<0 ||maxRow<0 ||minCol>= img.Cols() || maxCol>= img.Cols() ||minRow>=img.Rows() ||maxRow>= img.Rows())
+     { //cout <<"rectangle: "<<  minCol << ' '<<maxCol<<' '<<minRow<<' '<<maxRow<<endl;
+       return true;
+     }
+  ImageRectangleC faceRect(minRow, maxRow, minCol, maxCol);
+
+   // Smooth the image:
+//      cerr << "WARNING - NO SMOOTHING!!!\n";
+   // Zoom and crop
+  ImageC<DataT> cropImg(img, faceRect);
+  WarpScaleC<DataT, DataT> warpScaler(outRect);
+
+  normImg = warpScaler.Apply(cropImg);
+  return false;
+}
+int main(int argc, char** argv)
+{	
+	OptionC   opt(argc,argv);
+   	DirectoryC srcDir = opt.String("s", "/vol/vssp/vtefm/Data/Stirling/Stirling_targets/photos/","Dir for source images and eye pos files; for stirling data, photos");
+   	DirectoryC desDir = opt.String("d", "/vol/vssp/vtefm/Data/Stirling/Stirling_targets/video_stills/","Dir for target images and eyepos files; for stirling data, video still images");
+   	DirectoryC rsltDir = opt.String("r", "/vol/vssp/vtefm/user/xz0001/data/Stirling/VideoToMatch/","Dir for result images");
+	IntT colorTransformType = opt.Int("t", 1,"type of transform method: 0: affine transform RGB space, 1: color constancy method with Greyworld, 2 Mean/std norm, 3 hist shape mapping");
+	bool verbose=opt.Boolean("v", false,"verbose");
+   	opt.Check();
+	
+	DListC<StringC>  srcFilelist = srcDir.FiltList("*.jpg");
+ 	DListC<StringC>  desFilelist = desDir.FiltList("*.jpg");
+	
+	switch(colorTransformType) 
+	{	case 0: 
+		{	ColorNormAffineC colorNorm;
+			//cropped images with same size to train transform
+			IntT s1=55, s2=50; RealT rowFrac=0.35, colFrac=0.25;
+  
+			ImageRectangleC outRect(s1,s2);
+			Point2dC re = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * colFrac - 0.5);
+			Point2dC le = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * (1.0-colFrac) - 0.5);    
+			
+			// src filelist
+			for(DLIterC<StringC> itSrc(srcFilelist); itSrc;itSrc++)
+			{	// load src image;
+				ImageC<ByteRGBValueC> imSrc;
+				if(!Load(srcDir+'/'+(*itSrc),imSrc))
+				{ cerr<<"Failed to load image: "<<srcDir+'/'+(*itSrc)<<endl;        return 0;      }
+				if (verbose) cout<<"--------- Image loaded: " << srcDir+'/'+(*itSrc)<<endl;
+				ImageC<RealRGBValueC> imSrcReal = ByteRGBImageCT2RealRGBImageCT(imSrc);
+				//load src eyepos file
+				 // load pos file
+				FilenameC posSrcFilename = srcDir+'/'+(*itSrc).before('.')+".lnd";
+				if( !posSrcFilename.Exists()) 
+				{ cout<< "Posfile not exist"<<posSrcFilename<<endl;        continue;      }
+				IStreamC isPos(posSrcFilename);
+				RealT eyeLcol, eyeLrow,eyeRcol,eyeRrow;
+				isPos>>eyeRcol; isPos>>eyeRrow;isPos>>eyeLcol;isPos>>eyeLrow;
+				
+				//crop src image 
+				//geo norm img
+         			ImageC<RealRGBValueC> imSrcCropReal(s1,s2);
+				geoNorm<RealRGBValueC>(imSrcReal, imSrcCropReal, outRect, re, le, Point2dC(eyeLrow,eyeLcol), Point2dC(eyeRrow,eyeRcol)); 
+				//convert to byte Img
+				ImageC<ByteRGBValueC> imSrcCrop(s1,s2);
+				imSrcCrop=RealRGBImageCT2ByteRGBImageCT(imSrcCropReal); 
+         			Save("@X:Src", imSrcCrop);
+				//des list 
+				for(DLIterC<StringC> itDes(desFilelist); itDes; itDes++)
+				{	// load des image;
+					ImageC<ByteRGBValueC> imDes, imOut;
+					if(!Load(desDir+'/'+(*itDes),imDes))
+				     	{ cerr<<"Failed to load image: "<<desDir+'/'+(*itDes)<<endl;        return 0;      }
+		        		if (verbose) cout<<"---- des Image loaded: " << desDir+'/'+(*itDes)<<endl;
+					ImageC<RealRGBValueC> imDesReal = ByteRGBImageCT2RealRGBImageCT(imDes);
+					//load src eyepos file
+					 // load pos file
+					FilenameC posDesFilename = desDir+'/'+(*itDes).before('.')+".lnd";
+					if( !posDesFilename.Exists()) 
+					{ cout<< "Posfile not exist"<<posDesFilename<<endl;        continue;      }
+					IStreamC isPosDes(posDesFilename);
+					RealT eyeLcolDes, eyeLrowDes,eyeRcolDes,eyeRrowDes;
+					isPosDes>>eyeRcolDes; isPosDes>>eyeRrowDes; isPosDes>>eyeLcolDes; isPosDes>>eyeLrowDes;
+					//crop des image 
+				 	//geo norm img
+         				ImageC<RealRGBValueC> imDesCropReal(s1,s2);
+					geoNorm<RealRGBValueC>(imDesReal, imDesCropReal, outRect, re, le, Point2dC(eyeLrowDes,eyeLcolDes), Point2dC(eyeRrowDes,eyeRcolDes)); 
+					//convert to byte Img
+					ImageC<ByteRGBValueC> imDesCrop(s1,s2);
+					imDesCrop=RealRGBImageCT2ByteRGBImageCT(imDesCropReal); 
+         				Save("@X:Des", imDesCrop);
+					
+					// Learn transform from crop img pairs
+					if(! colorNorm.LearnTransformFromImgs(imSrcCrop,imDesCrop, verbose))
+			   		{ 	cerr<<"Failed to learn transform from imgs"<<endl; return 0;}
+					//cout<<"-- affine transform learned"<<endl;
+  					//Apply the transform
+					imOut = colorNorm.Apply(imSrc, verbose);
+					Save("@X:Out", imOut);
+					
+					// apply background masking to the result img
+					for(Array2dIter2C<ByteRGBValueC, ByteRGBValueC> itMask(imOut, imSrc); itMask;itMask++)
+					{	if( itMask.Data2().Red()>=240 && itMask.Data2().Green()>=240 && itMask.Data2().Blue()>=240 )
+						{	itMask.Data1().Red()=255; itMask.Data1().Green()=255; itMask.Data1().Blue()=255; }
+					}	
+					// save result image
+					FilenameC ofilename;
+					if((*itDes).contains('-')) 	
+						ofilename = rsltDir+'/'+(*itDes).before('-')+'_'+(*itSrc).before('.') +".jpg";
+					else
+						ofilename = rsltDir+'/'+(*itDes).before('.')+'_'+(*itSrc).before('-') +".jpg";
+					if(!Save(ofilename, imOut))
+					{ cerr<<"Failed to save image to: "<<ofilename <<endl;        return 0; }
+					if (verbose) cout<<"--- result Image saved: " << ofilename <<endl;
+					
+				}
+			}
+		 } break;
+		case 1: 
+		{	ColorNormC colorNorm; 
+			colorNorm.SetColorConstType( GREY_WORLD);
+			for(DLIterC<StringC> itSrc(srcFilelist); itSrc;itSrc++)
+			{	// load src image;
+				ImageC<ByteRGBValueC> imSrc;
+				if(!Load(srcDir+'/'+(*itSrc),imSrc))
+				{ cerr<<"Failed to load image: "<<srcDir+'/'+(*itSrc)<<endl;        return 0;      }
+				if (verbose) cout<<"--------- Image loaded: " << srcDir+'/'+(*itSrc)<<endl;
+				ImageRectangleC imSrcRec = imSrc.Frame();
+				ImageRectangleC imSrcCropRec( imSrcRec.Center(),	imSrc.Rows()/2, imSrc.Cols()/2);
+				// estimate src illum color from center region
+				VectorC illumSrc = colorNorm.IllumEstimate(imSrc, imSrcCropRec, verbose);
+				if (verbose) cout<<" img source illum:" << illumSrc<<endl;
+					
+				//des list 
+				for(DLIterC<StringC> itDes(desFilelist); itDes; itDes++)
+				{	// load des image;
+					ImageC<ByteRGBValueC> imDes, imOut;
+					if(!Load(desDir+'/'+(*itDes),imDes))
+				     	{ cerr<<"Failed to load image: "<<desDir+'/'+(*itDes)<<endl;        return 0;      }
+		        		if (verbose) cout<<"---- des Image loaded: " << desDir+'/'+(*itDes)<<endl;
+					
+					// estimate des illum color 
+					ImageRectangleC imDesRec = imDes.Frame();
+					ImageRectangleC imDesCropRec( imDesRec.Center(), imDes.Rows()/2, imDes.Cols()/2);
+					VectorC illumDes = colorNorm.IllumEstimate(imDes, imDesCropRec, verbose);
+					
+					// transform color
+					//cout<<"target illum "<< illumDes<<endl;	
+					imOut = colorNorm.Transform(imSrc, illumSrc, illumDes, verbose);
+					// apply background masking to the result img
+					for(Array2dIter2C<ByteRGBValueC, ByteRGBValueC> itMask(imOut, imSrc); itMask;itMask++)
+					{	if( itMask.Data2().Red()>=240 && itMask.Data2().Green()>=240 && itMask.Data2().Blue()>=240 )
+						{	itMask.Data1().Red()=255; itMask.Data1().Green()=255; itMask.Data1().Blue()=255; }
+					}	
+					// save result image
+					FilenameC ofilename;
+					if((*itDes).contains('-')) 	
+						ofilename = rsltDir+'/'+(*itDes).before('-')+'_'+(*itSrc).before('.') +".jpg";
+					else
+						ofilename = rsltDir+'/'+(*itDes).before('.')+'_'+(*itSrc).before('-') +".jpg";
+					if(!Save(ofilename, imOut))
+					{ cerr<<"Failed to save image to: "<<ofilename <<endl;        return 0; }
+					if (verbose) cout<<"--- result Image saved: " << ofilename <<endl;
+				
+				}
+			}
+			
+         	} break;
+		case 2: 
+		{	ColorNormHistStatC colorNorm; 
+			IntT s1=55, s2=50; RealT rowFrac=0.35, colFrac=0.25;
+  
+			ImageRectangleC outRect(s1,s2);
+			Point2dC re = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * colFrac - 0.5);
+			Point2dC le = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * (1.0-colFrac) - 0.5);    
+			
+			for(DLIterC<StringC> itSrc(srcFilelist); itSrc;itSrc++)
+			{	// load src image;
+				ImageC<ByteRGBValueC> imSrc;
+				if(!Load(srcDir+'/'+(*itSrc),imSrc))
+				{ cerr<<"Failed to load image: "<<srcDir+'/'+(*itSrc)<<endl;        return 0;      }
+				if (verbose) cout<<"--------- Image loaded: " << srcDir+'/'+(*itSrc)<<endl;
+				ImageC<RealRGBValueC> imSrcReal = ByteRGBImageCT2RealRGBImageCT(imSrc);
+				//load src eyepos file
+				 // load pos file
+				FilenameC posSrcFilename = srcDir+'/'+(*itSrc).before('.')+".lnd";
+				if( !posSrcFilename.Exists()) 
+				{ cout<< "Posfile not exist"<<posSrcFilename<<endl;        continue;      }
+				IStreamC isPos(posSrcFilename);
+				RealT eyeLcol, eyeLrow,eyeRcol,eyeRrow;
+				isPos>>eyeRcol; isPos>>eyeRrow;isPos>>eyeLcol;isPos>>eyeLrow;
+				
+				//crop src image 
+				//geo norm img
+         			ImageC<RealRGBValueC> imSrcCropReal(s1,s2);
+				geoNorm<RealRGBValueC>(imSrcReal, imSrcCropReal, outRect, re, le, Point2dC(eyeLrow,eyeLcol), Point2dC(eyeRrow,eyeRcol)); 
+				//convert to byte Img
+				ImageC<ByteRGBValueC> imSrcCrop(s1,s2);
+				imSrcCrop=RealRGBImageCT2ByteRGBImageCT(imSrcCropReal); 
+         			Save("@X:Source", imSrcCrop);
+				//if (verbose) cout<<" img source illum:" << illumSrc<<endl;
+					
+				//des list 
+				for(DLIterC<StringC> itDes(desFilelist); itDes; itDes++)
+				{	// load des image;
+					ImageC<ByteRGBValueC> imDes, imOut, imOutCrop;
+					if(!Load(desDir+'/'+(*itDes),imDes))
+				     	{ cerr<<"Failed to load image: "<<desDir+'/'+(*itDes)<<endl;        return 0;      }
+		        		if (verbose) cout<<"---- des Image loaded: " << desDir+'/'+(*itDes)<<endl;
+					ImageC<RealRGBValueC> imDesReal = ByteRGBImageCT2RealRGBImageCT(imDes);
+					// load pos file
+					FilenameC posDesFilename = desDir+'/'+(*itDes).before('.')+".lnd";
+					if( !posDesFilename.Exists()) 
+					{ cout<< "Posfile not exist"<<posDesFilename<<endl;        continue;      }
+					IStreamC isPosDes(posDesFilename);
+					RealT eyeLcolDes, eyeLrowDes,eyeRcolDes,eyeRrowDes;
+					isPosDes>>eyeRcolDes; isPosDes>>eyeRrowDes; isPosDes>>eyeLcolDes; isPosDes>>eyeLrowDes;
+					//crop des image 
+				 	//geo norm img
+         				ImageC<RealRGBValueC> imDesCropReal(s1,s2);
+					geoNorm<RealRGBValueC>(imDesReal, imDesCropReal, outRect, re, le, Point2dC(eyeLrowDes,eyeLcolDes), Point2dC(eyeRrowDes,eyeRcolDes)); 
+					//convert to byte Img
+					ImageC<ByteRGBValueC> imDesCrop(s1,s2);
+					imDesCrop=RealRGBImageCT2ByteRGBImageCT(imDesCropReal); 
+         				Save("@X:Des", imDesCrop);
+				
+					Vector3dC meanVecSrc,stdVecSrc,meanVecDes, stdVecDes;
+					colorNorm.GetHistStatistics(imSrcCrop, meanVecSrc, stdVecSrc);
+					colorNorm.GetHistStatistics(imDesCrop, meanVecDes, stdVecDes);
+					
+					// transform color
+					imOut = colorNorm.Apply( imSrc, meanVecDes, stdVecDes, meanVecSrc, stdVecSrc);
+					imOutCrop = colorNorm.Apply( imSrcCrop, meanVecDes, stdVecDes, meanVecSrc, stdVecSrc);
+					Save("@X:Out", imOut);
+					Save("@X:OutCrop", imOutCrop);
+				
+					// apply background masking to the result img
+					for(Array2dIter2C<ByteRGBValueC, ByteRGBValueC> itMask(imOut, imSrc); itMask;itMask++)
+					{	if( itMask.Data2().Red()>=240 && itMask.Data2().Green()>=240 && itMask.Data2().Blue()>=240 )
+						{	itMask.Data1().Red()=255; itMask.Data1().Green()=255; itMask.Data1().Blue()=255; }
+					}	
+					// save result image
+					FilenameC ofilename;
+					if((*itDes).contains('-')) 	
+						ofilename = rsltDir+'/'+(*itDes).before('-')+'_'+(*itSrc).before('.') +".jpg";
+					else
+						ofilename = rsltDir+'/'+(*itDes).before('.')+'_'+(*itSrc).before('-') +".jpg";
+					if(!Save(ofilename, imOut))
+					{ cerr<<"Failed to save image to: "<<ofilename <<endl;        return 0; }
+					if (verbose) cout<<"--- result Image saved: " << ofilename <<endl;
+				
+				}
+			}
+			
+         	} break;
+		case 3:
+		{	
+			ColorNormHistShapeC colorNorm; 
+			IntT s1=55, s2=50; RealT rowFrac=0.33, colFrac=0.20;
+  
+			ImageRectangleC outRect(s1,s2);
+			Point2dC re = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * colFrac - 0.5);
+			Point2dC le = Point2dC((RealT) s1 *rowFrac, (RealT)s2 * (1.0-colFrac) - 0.5);    
+			
+			for(DLIterC<StringC> itSrc(srcFilelist); itSrc;itSrc++)
+			{	// load src image;
+				ImageC<ByteRGBValueC> imSrc;
+				if(!Load(srcDir+'/'+(*itSrc),imSrc))
+				{ cerr<<"Failed to load image: "<<srcDir+'/'+(*itSrc)<<endl;        return 0;      }
+				if (verbose) cout<<"--------- Image loaded: " << srcDir+'/'+(*itSrc)<<endl;
+				ImageC<RealRGBValueC> imSrcReal = ByteRGBImageCT2RealRGBImageCT(imSrc);
+				//load src eyepos file
+				 // load pos file
+				FilenameC posSrcFilename = srcDir+'/'+(*itSrc).before('.')+".lnd";
+				if( !posSrcFilename.Exists()) 
+				{ cout<< "Posfile not exist"<<posSrcFilename<<endl;        continue;      }
+				IStreamC isPos(posSrcFilename);
+				RealT eyeLcol, eyeLrow,eyeRcol,eyeRrow;
+				isPos>>eyeRcol; isPos>>eyeRrow;isPos>>eyeLcol;isPos>>eyeLrow;
+				
+				//crop src image 
+				//geo norm img
+         			ImageC<RealRGBValueC> imSrcCropReal(s1,s2);
+				geoNorm<RealRGBValueC>(imSrcReal, imSrcCropReal, outRect, re, le, Point2dC(eyeLrow,eyeLcol), Point2dC(eyeRrow,eyeRcol)); 
+				//convert to byte Img
+				ImageC<ByteRGBValueC> imSrcCrop(s1,s2);
+				imSrcCrop=RealRGBImageCT2ByteRGBImageCT(imSrcCropReal); 
+         			Save("@X:Source", imSrcCrop);
+				//if (verbose) cout<<" img source illum:" << illumSrc<<endl;
+					
+				//des list 
+				for(DLIterC<StringC> itDes(desFilelist); itDes; itDes++)
+				{	// load des image;
+					ImageC<ByteRGBValueC> imDes, imOut;
+					if(!Load(desDir+'/'+(*itDes),imDes))
+				     	{ cerr<<"Failed to load image: "<<desDir+'/'+(*itDes)<<endl;        return 0;      }
+		        		if (verbose) cout<<"---- des Image loaded: " << desDir+'/'+(*itDes)<<endl;
+					ImageC<RealRGBValueC> imDesReal = ByteRGBImageCT2RealRGBImageCT(imDes);
+					// load pos file
+					FilenameC posDesFilename = desDir+'/'+(*itDes).before('.')+".lnd";
+					if( !posDesFilename.Exists()) 
+					{ cout<< "Posfile not exist"<<posDesFilename<<endl;        continue;      }
+					IStreamC isPosDes(posDesFilename);
+					RealT eyeLcolDes, eyeLrowDes,eyeRcolDes,eyeRrowDes;
+					isPosDes>>eyeRcolDes; isPosDes>>eyeRrowDes; isPosDes>>eyeLcolDes; isPosDes>>eyeLrowDes;
+					//crop des image 
+				 	//geo norm img
+         				ImageC<RealRGBValueC> imDesCropReal(s1,s2);
+					geoNorm<RealRGBValueC>(imDesReal, imDesCropReal, outRect, re, le, Point2dC(eyeLrowDes,eyeLcolDes), Point2dC(eyeRrowDes,eyeRcolDes)); 
+					//convert to byte Img
+					ImageC<ByteRGBValueC> imDesCrop(s1,s2);
+					imDesCrop=RealRGBImageCT2ByteRGBImageCT(imDesCropReal); 
+         				
+					colorNorm.GetColorMap(imSrcCrop, imDesCrop);
+					Save("@X:Des", imDesCrop);
+				
+					// transform color
+					imOut = colorNorm.Apply( imSrc);
+					ImageC<ByteRGBValueC> imOutCrop = colorNorm.Apply(imSrcCrop);
+					Save("@X:OutCrop", imOutCrop);
+					Save("@X:Out", imOut);
+				
+					// apply background masking to the result img
+					for(Array2dIter2C<ByteRGBValueC, ByteRGBValueC> itMask(imOut, imSrc); itMask;itMask++)
+					{	if( itMask.Data2().Red()>=240 && itMask.Data2().Green()>=240 && itMask.Data2().Blue()>=240 )
+						{	itMask.Data1().Red()=255; itMask.Data1().Green()=255; itMask.Data1().Blue()=255; }
+					}	
+					// save result image
+					FilenameC ofilename;
+					if((*itDes).contains('-')) 	
+						ofilename = rsltDir+'/'+(*itDes).before('-')+'_'+(*itSrc).before('.') +".jpg";
+					else
+						ofilename = rsltDir+'/'+(*itDes).before('.')+'_'+(*itSrc).before('-') +".jpg";
+					if(!Save(ofilename, imOut))
+					{ cerr<<"Failed to save image to: "<<ofilename <<endl;        return 0; }
+					if (verbose) cout<<"--- result Image saved: " << ofilename <<endl;
+				
+				}
+			}
+			
+         	} break;
+		default: ;
+	}
+	
+
+	return 1;
+}

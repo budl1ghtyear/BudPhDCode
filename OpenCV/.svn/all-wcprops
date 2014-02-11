@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/ravl/!svn/ver/7075/main/Ravl/Contrib/OpenCV
+END
+OpenCVConvert.cc
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/ravl/!svn/ver/7075/main/Ravl/Contrib/OpenCV/OpenCVConvert.cc
+END
+OpenCV.def
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ravl/!svn/ver/6484/main/Ravl/Contrib/OpenCV/OpenCV.def
+END
+defs.mk
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ravl/!svn/ver/6225/main/Ravl/Contrib/OpenCV/defs.mk
+END
+OpenCVConvert.hh
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/ravl/!svn/ver/7075/main/Ravl/Contrib/OpenCV/OpenCVConvert.hh
+END
+exOpenCV.cc
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/ravl/!svn/ver/6051/main/Ravl/Contrib/OpenCV/exOpenCV.cc
+END
+OpenCV.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/ravl/!svn/ver/6236/main/Ravl/Contrib/OpenCV/OpenCV.html
+END
+testOpenCV.cc
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/ravl/!svn/ver/7075/main/Ravl/Contrib/OpenCV/testOpenCV.cc
+END
